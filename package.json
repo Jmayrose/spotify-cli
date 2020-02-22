@@ -1,0 +1,27 @@
+{
+  "name": "spotify-cli",
+  "version": "0.0.1",
+  "description": "Spotify CLI for windows",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jmayrose/spotify-cli.git"
+  },
+  "keywords": [
+    "CLI"
+  ],
+  "author": "JMayrose",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jmayrose/spotify-cli/issues"
+  },
+  "homepage": "https://github.com/Jmayrose/spotify-cli#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "commander": "^4.1.1",
+    "spotify-web-api-node": "^4.0.0"
+  }
+}
