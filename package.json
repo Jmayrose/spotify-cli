@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "description": "Spotify CLI for windows",
   "main": "index.js",
-  "scripts": {
-  
-},
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Jmayrose/spotify-cli.git"
@@ -22,6 +20,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "commander": "^4.1.1",
+    "jest": "^25.1.0",
     "spotify-web-api-node": "^4.0.0"
   }
 }
