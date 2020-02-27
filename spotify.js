@@ -1,7 +1,7 @@
 let SpotifyApi = require("spotify-web-api-node");
 require("dotenv").config();
 
-let Spotify = new SpotifyApi({
+let API = new SpotifyApi({
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET
 });
@@ -14,14 +14,13 @@ let tokenExpires;
 // Spotify.setAccessToken(accessToken);
 
 //TODO specify API scopes
-function startSpotify() {
-  console.log("Starting Spotify");
-  Spotify.clientCredentialsGrant().then(
+module.exports.start = function start() {
+  API.clientCredentialsGrant().then(
     data => {
       accessToken = data.body["access_token"];
       tokenExpires = data.body["expires_in"];
 
-      Spotify.setAccessToken(accessToken);
+      API.setAccessToken(accessToken);
     },
     err => {
       console.log(
@@ -30,13 +29,8 @@ function startSpotify() {
       );
     }
   );
-}
+};
 
-function doSomeShit(){
-    console.log('did some shit');
-}
+module.exports.play = function play() {
 
-export {
-  startSpotify,
-    
 };
