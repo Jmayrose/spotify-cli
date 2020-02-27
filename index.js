@@ -1,8 +1,7 @@
 const program = require("commander");
+var Spotify = require("./spotify");
 
-import './spotify.js';
-
-startSpotify();
+Spotify.start();
 
 program.version("0.0.1");
 program.name("spotify");
@@ -15,37 +14,27 @@ program
 program
   .command("start")
   .description("begin music playback")
-  .action(() => {
-    console.log("YOU DONE STARTED");
-  });
+  .action();
 
 program
   .command("stop")
   .description("suspend music playback")
-  .action(() => {
-    console.log("YOU DONE STOPPED");
-  });
+  .action();
 
 program
   .command("next")
   .description("skip to the next song in the queue")
-  .action(() => {
-    console.log("YOU DONE SKIPPED A SONG");
-  });
+  .action();
 
 program
   .command("prev")
   .description("starts the most recently played song")
-  .action(() => {
-    console.log("YOU DONE GONE BACK");
-  });
+  .action();
 
 program
   .command("search <query>")
   .description("Search for a specified track, album, or playlist")
-  .action(function(query) {
-    console.log("searchin' for ", query);
-  });
+  .action();
 
 //Need to autorize spotify on every call .then() perform actions
 
