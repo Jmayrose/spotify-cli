@@ -6,14 +6,17 @@ let API = new SpotifyApi({
   clientSecret: process.env.CLIENT_SECRET
 });
 
-//TODO token persistent storage
-let accessToken;
-let tokenExpires;
+//token persistent storage?
+let accessToken, tokenExpires;
 
-//TODO set access token if valid, else grant credentials
+//TODO Change to User authorization
+
+
 // Spotify.setAccessToken(accessToken);
 
-//TODO specify API scopes
+/** @name start
+ *  @description generates access credentials
+ */
 module.exports.start = function start() {
   API.clientCredentialsGrant().then(
     data => {
@@ -21,16 +24,20 @@ module.exports.start = function start() {
       tokenExpires = data.body["expires_in"];
 
       API.setAccessToken(accessToken);
+      // console.log(accessToken);
     },
     err => {
-      console.log(
-        "Something went wrong when retrieving an access token",
-        err.message
-      );
+      console.log(err.message);
     }
   );
 };
 
-module.exports.play = function play() {
+/** @name clear
+ *  @description clears queue of all songs
+ */
+module.exports.clear = function clear() {};
 
-};
+/** @name pause
+ * @description pauses playback
+ */
+module.exports.pause = function pause() {};

@@ -3,39 +3,22 @@ var Spotify = require("./spotify");
 
 Spotify.start();
 
-program.version("0.0.1");
+program.version("0.0.5");
 program.name("spotify");
 
-program
-  .option("-t, --track")
-  .option("-p, --playlist")
-  .option("-a, --album");
+program.command("login").action(Spotify.login());//Opens prompt for app authorization for account access
 
-program
-  .command("start")
-  .description("begin music playback")
-  .action();
+program.command("play"); //resumes music //Typable
+program.command("pause").action(Spotify.pause());
 
-program
-  .command("stop")
-  .description("suspend music playback")
-  .action();
+program.command("skip");//skips to next song in queue
+program.command("rewind");//
 
-program
-  .command("next")
-  .description("skip to the next song in the queue")
-  .action();
+program.command("add"); //adds item to queue //Typable
 
-program
-  .command("prev")
-  .description("starts the most recently played song")
-  .action();
+program.command("queue"); //displays 5 items in queue
+program.command("clear").action(Spotify.clear());
 
-program
-  .command("search <query>")
-  .description("Search for a specified track, album, or playlist")
-  .action();
-
-//Need to autorize spotify on every call .then() perform actions
+program.command("search"); //Typable
 
 program.parse(process.argv);
