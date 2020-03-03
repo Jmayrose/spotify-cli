@@ -6,7 +6,7 @@ Spotify.start();
 program.version("0.0.5");
 program.name("spotify");
 
-program.command("login").action(Spotify.login());//Opens prompt for app authorization for account access
+program.command("login").action();//Opens prompt for app authorization for account access
 
 program.command("play"); //resumes music //Typable
 program.command("pause").action(Spotify.pause());

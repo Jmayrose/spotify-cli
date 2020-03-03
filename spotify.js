@@ -1,4 +1,5 @@
 let SpotifyApi = require("spotify-web-api-node");
+const axios = require("axios");
 require("dotenv").config();
 
 let API = new SpotifyApi({
@@ -9,11 +10,6 @@ let API = new SpotifyApi({
 //token persistent storage?
 let accessToken, tokenExpires;
 
-//TODO Change to User authorization
-
-
-// Spotify.setAccessToken(accessToken);
-
 /** @name start
  *  @description generates access credentials
  */
@@ -23,7 +19,7 @@ module.exports.start = function start() {
       accessToken = data.body["access_token"];
       tokenExpires = data.body["expires_in"];
 
-      API.setAccessToken(accessToken);
+      API.setAccessToken(process.env.ACCESS_TOKEN);
       // console.log(accessToken);
     },
     err => {
