@@ -20,7 +20,13 @@
   "dependencies": {
     "axios": "^0.19.2",
     "commander": "^4.1.1",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "jest": "^25.1.0",
+    "opn": "^6.0.0",
+    "querystring": "^0.2.0",
+    "request": "^2.88.2",
     "spotify-web-api-node": "^4.0.0"
   }
 }
