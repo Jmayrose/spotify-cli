@@ -13,19 +13,43 @@ const myAxios = axios.create({
   headers: { Authorization: "Bearer " + tokenManagement.getAuth() },
 });
 
+const generalError = () => {
+  console.log("Something went wrong");
+};
+
 module.exports.play = () => {
-  myAxios.put("https://api.spotify.com/v1/me/player/play");
+  myAxios
+    .put("https://api.spotify.com/v1/me/player/play")
+    .then()
+    .catch((err) => {
+      generalError();
+      console.log(err.data);
+    });
 };
 module.exports.pause = () => {
-  myAxios.put("https://api.spotify.com/v1/me/player/pause");
+  myAxios
+    .put("https://api.spotify.com/v1/me/player/pause")
+    .then()
+    .catch((err) => {
+      generalError();
+      console.log(err.data);
+    });
 };
 module.exports.skip = () => {
-  myAxios.post("https://api.spotify.com/v1/me/player/next");
+  myAxios
+    .post("https://api.spotify.com/v1/me/player/next")
+    .then()
+    .catch((err) => {
+      generalError();
+      console.log(err.data);
+    });
 };
 
 //if not already authorized, will prompt for login
 //TODO Test unauthroized login
 module.exports.init = () => {
+
+  //TODO try to refresh bearer token before authorizing
   let state = "";
   let possible =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -38,16 +62,6 @@ module.exports.init = () => {
   app = express();
   app.listen(8888);
 
-  open(
-    "https://accounts.spotify.com/authorize?" +
-      querystring.stringify({
-        client_id: process.env.CLIENT_ID,
-        response_type: "code",
-        scope: scope,
-        redirect_uri: process.env.REDIRECT_URI,
-        state: state,
-      })
-  );
   app.get("/callback", function (res, req) {
     let authOptions = {
       url: "https://accounts.spotify.com/api/token",
@@ -65,21 +79,30 @@ module.exports.init = () => {
       },
       json: true,
     };
-
     request.post(authOptions, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
+      if (error || response.statusCode !== 200) {
+        console.log("errors", error);
+      } else {
         tokenManagement.setAuth(body.access_token);
         tokenManagement.setRefresh(body.refresh_token);
-      } else {
-        console.log("Threw some errors here bud");
       }
     });
   });
-  process.exit();
-};
 
-//TODO test tokenRefresh
-tokenRefresh = () => {
+  open(
+    "https://accounts.spotify.com/authorize?" +
+      querystring.stringify({
+        client_id: process.env.CLIENT_ID,
+        response_type: "code",
+        scope: scope,
+        redirect_uri: process.env.REDIRECT_URI,
+        state: state,
+      })
+  );
+
+  //process.exit() after everything is done
+};
+module.exports.tokenRefresh = () => {
   let authOptions = {
     url: "https://accounts.spotify.com/api/token",
     headers: {
@@ -98,10 +121,7 @@ tokenRefresh = () => {
 
   request.post(authOptions, function (error, response, body) {
     if (!error && response.statusCode === 200) {
-      let access_token = body.access_token; //May need to swap this out for tokenManagement call
-      res.send({
-        access_token: access_token,
-      });
+      tokenManagement.setAuth(body.access_token);
     }
   });
 };
