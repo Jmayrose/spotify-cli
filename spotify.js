@@ -1,54 +1,84 @@
 const express = require("express");
 const axios = require("axios");
-const querystring = require("querystring");
+const querystring = require("querystring"); //! deprecated
 const open = require("open");
-
-const tokenManagement = require("./tokenManagement");
 
 require("dotenv").config();
 
-const request = require("request"); //TODO Refactor request calls to axios
+const tokenManagement = require("./tokenManagement");
+
+const request = require("request"); //! deprecated
+//TODO Refactor request calls to axios
 
 const myAxios = axios.create({
   headers: { Authorization: "Bearer " + tokenManagement.getAuth() },
 });
 
-const generalError = () => {
-  console.log("Something went wrong");
-};
-
-module.exports.play = () => {
+module.exports.resume = () => {
   myAxios
     .put("https://api.spotify.com/v1/me/player/play")
     .then()
     .catch((err) => {
-      generalError();
-      console.log(err.data);
+      if (err.response.data.error.status !== 403) {
+        console.log("Something went wrong");
+      }
     });
 };
+
 module.exports.pause = () => {
   myAxios
     .put("https://api.spotify.com/v1/me/player/pause")
     .then()
-    .catch((err) => {
-      generalError();
-      console.log(err.data);
-    });
+    .catch(() => console.log("Something went wrong"));
 };
+
 module.exports.skip = () => {
+  //TODO Log name of next song to console
   myAxios
     .post("https://api.spotify.com/v1/me/player/next")
     .then()
+    .catch(() => console.log("Something went wrong"));
+};
+
+module.exports.queue = async (query) => {
+  query.join("+");
+
+  let type = "track";
+
+  console.log("queuing the", type, query);
+
+  myAxios
+    .get(`https://api.spotify.com/v1/search?q=${query}&limit=1&type=${type}`)
+    .then((res) => {
+      let uri = res.data.tracks.items[0].uri;
+      myAxios
+        .post(`https://api.spotify.com/v1/me/player/queue?uri=${uri}`)
+        .then()
+        .catch((err) => {
+          generalError();
+        });
+    })
     .catch((err) => {
       generalError();
-      console.log(err.data);
     });
 };
 
-//if not already authorized, will prompt for login
-//TODO Test unauthroized login
-module.exports.init = () => {
+module.exports.search = (query) => {
+  //TODO Add type parameter to query
+  //! for now type default to track
 
+  query = query.join("+");
+
+  myAxios
+    .get(`https://api.spotify.com/v1/search?q=${query}&type=${type}`)
+    .then((res) => {
+      console.log(res.data.tracks.items);
+      //TODO Extract meaningful data from this
+    })
+    .catch();
+};
+
+module.exports.init = () => {
   //TODO try to refresh bearer token before authorizing
   let state = "";
   let possible =
@@ -85,10 +115,13 @@ module.exports.init = () => {
       } else {
         tokenManagement.setAuth(body.access_token);
         tokenManagement.setRefresh(body.refresh_token);
+        console.log("Initialization successful");
+        //TODO process.exit() after files saved
       }
     });
   });
 
+  //TODO console log shorter link for user to click on
   open(
     "https://accounts.spotify.com/authorize?" +
       querystring.stringify({
@@ -99,10 +132,9 @@ module.exports.init = () => {
         state: state,
       })
   );
-
-  //process.exit() after everything is done
 };
-module.exports.tokenRefresh = () => {
+
+tokenRefresh = () => {
   let authOptions = {
     url: "https://accounts.spotify.com/api/token",
     headers: {
@@ -116,8 +148,10 @@ module.exports.tokenRefresh = () => {
       grant_type: "refresh_token",
       refresh_token: tokenManagement.getRefresh(),
     },
-    json: true,
   };
+
+  console.log("tokenRefresh authOptions:");
+  console.log(authOptions);
 
   request.post(authOptions, function (error, response, body) {
     if (!error && response.statusCode === 200) {
