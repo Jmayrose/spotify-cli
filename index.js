@@ -6,6 +6,8 @@ program.name("spotify");
 
 //TODO Write README
 
+program.option("-t, --track").option("-a, --artist").option("-p, --playlist");
+
 program.command("init").action(() => Spotify.init());
 program.command("resume").action(() => Spotify.resume());
 program.command("pause").action(() => Spotify.pause());
@@ -13,10 +15,14 @@ program.command("skip").action(() => Spotify.skip());
 
 //TODO queue track
 //? album/playlist/artist
-program.command("queue <query...>").action((query) => Spotify.queue(query));
+program
+  .command("queue <query...>")
+  .action((query, type) => Spotify.queue(query, "track"));
 
 //TODO search track
 //? album/playlist/artist
-program.command("search <query...>").action((query) => Spotify.search(query));
+program
+  .command("search <query...>")
+  .action((query, type) => Spotify.search(query));
 
 program.parse(process.argv);

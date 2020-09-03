@@ -20,6 +20,7 @@ module.exports.resume = () => {
     .then()
     .catch((err) => {
       if (err.response.data.error.status !== 403) {
+        console.log(err.response);
         console.log("Something went wrong");
       }
     });
@@ -36,14 +37,11 @@ module.exports.skip = () => {
   //TODO Log name of next song to console
   myAxios
     .post("https://api.spotify.com/v1/me/player/next")
-    .then()
     .catch(() => console.log("Something went wrong"));
 };
 
-module.exports.queue = async (query) => {
+module.exports.queue = async (query, type) => {
   query.join("+");
-
-  let type = "track";
 
   console.log("queuing the", type, query);
 
@@ -55,15 +53,15 @@ module.exports.queue = async (query) => {
         .post(`https://api.spotify.com/v1/me/player/queue?uri=${uri}`)
         .then()
         .catch((err) => {
-          generalError();
+          console.log(err);
         });
     })
     .catch((err) => {
-      generalError();
+      console.log(err);
     });
 };
 
-module.exports.search = (query) => {
+module.exports.search = (query, type) => {
   //TODO Add type parameter to query
   //! for now type default to track
 
@@ -79,59 +77,65 @@ module.exports.search = (query) => {
 };
 
 module.exports.init = () => {
-  //TODO try to refresh bearer token before authorizing
-  let state = "";
-  let possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 16; i++) {
-    state += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  let scope =
-    "user-read-private user-read-email user-read-playback-state streaming playlist-read-collaborative user-modify-playback-state playlist-modify-public user-library-modify user-top-read user-read-currently-playing playlist-read-private user-follow-read app-remote-control user-read-recently-played playlist-modify-private user-follow-modify user-library-read";
+  if (tokenManagement.getRefresh() !== null) {
+    console.log("Spotify CLI already initialized");
+    tokenRefresh();
+  } else {
+    //TODO try to refresh tokens before attempting to authorize
+    //! REFRESH TOKENS ARE GOOD "BASICALLY FOREVER"
+    let state = "";
+    let possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (let i = 0; i < 16; i++) {
+      state += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    let scope =
+      "user-read-private user-read-email user-read-playback-state streaming playlist-read-collaborative user-modify-playback-state playlist-modify-public user-library-modify user-top-read user-read-currently-playing playlist-read-private user-follow-read app-remote-control user-read-recently-played playlist-modify-private user-follow-modify user-library-read";
 
-  app = express();
-  app.listen(8888);
+    app = express();
+    app.listen(8888);
 
-  app.get("/callback", function (res, req) {
-    let authOptions = {
-      url: "https://accounts.spotify.com/api/token",
-      form: {
-        code: res.query.code,
-        redirect_uri: process.env.REDIRECT_URI,
-        grant_type: "authorization_code",
-      },
-      headers: {
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
-          ).toString("base64"),
-      },
-      json: true,
-    };
-    request.post(authOptions, function (error, response, body) {
-      if (error || response.statusCode !== 200) {
-        console.log("errors", error);
-      } else {
-        tokenManagement.setAuth(body.access_token);
-        tokenManagement.setRefresh(body.refresh_token);
-        console.log("Initialization successful");
-        //TODO process.exit() after files saved
-      }
+    app.get("/callback", function (res, req) {
+      let authOptions = {
+        url: "https://accounts.spotify.com/api/token",
+        form: {
+          code: res.query.code,
+          redirect_uri: process.env.REDIRECT_URI,
+          grant_type: "authorization_code",
+        },
+        headers: {
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
+            ).toString("base64"),
+        },
+        json: true,
+      };
+      request.post(authOptions, function (error, response, body) {
+        if (error || response.statusCode !== 200) {
+          console.log("errors", error);
+        } else {
+          tokenManagement.setAuth(body.access_token);
+          tokenManagement.setRefresh(body.refresh_token);
+          console.log("Initialization successful");
+          //TODO process.exit() after files saved
+        }
+      });
     });
-  });
 
-  //TODO console log shorter link for user to click on
-  open(
-    "https://accounts.spotify.com/authorize?" +
-      querystring.stringify({
-        client_id: process.env.CLIENT_ID,
-        response_type: "code",
-        scope: scope,
-        redirect_uri: process.env.REDIRECT_URI,
-        state: state,
-      })
-  );
+    //TODO console log shorter link for user to click on
+    open(
+      "https://accounts.spotify.com/authorize?" +
+        querystring.stringify({
+          client_id: process.env.CLIENT_ID,
+          response_type: "code",
+          scope: scope,
+          redirect_uri: process.env.REDIRECT_URI,
+          state: state,
+        })
+    );
+  }
 };
 
 tokenRefresh = () => {
@@ -149,13 +153,10 @@ tokenRefresh = () => {
       refresh_token: tokenManagement.getRefresh(),
     },
   };
-
-  console.log("tokenRefresh authOptions:");
-  console.log(authOptions);
-
-  request.post(authOptions, function (error, response, body) {
+  request.post(authOptions, function (error, response) {
+    console.log(response);
     if (!error && response.statusCode === 200) {
-      tokenManagement.setAuth(body.access_token);
+      tokenManagement.setAuth(response.body.access_token);
     }
   });
 };
